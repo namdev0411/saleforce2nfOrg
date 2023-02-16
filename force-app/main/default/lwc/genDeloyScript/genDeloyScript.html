@@ -1,0 +1,30 @@
+<template>
+    <div class="c-container">
+        <lightning-layout vertical-align="center" class="x-large">
+            <lightning-layout-item size="4"></lightning-layout-item>
+            <lightning-layout-item size="4" padding="around-small">
+                <div class="custom-box">
+                    <lightning-input type="text" label="Git branch" placeholder="TEC-FEIT-1102"></lightning-input>
+                    <div class="pick-org">
+                        <lightning-combobox
+                            name="progress"
+                            label="Status"
+                            value={selectedOrg}
+                            placeholder="Select Progress"
+                            options={OrgOptions}
+                            onchange={handleChange} >
+                        </lightning-combobox>
+                    </div>
+                    <lightning-input type="text" label="From commit" placeholder="acx432cd"></lightning-input>
+                    <lightning-input type="text" label="To Commit" placeholder="scxde34d"></lightning-input>
+                    <div class="slds-grid slds-grid_align-center">
+                        <button type="button" name="Submit" value="Submit Case" class="stretchButton slds-button slds-button_brand slds-button_stretch" onclick={handleClick} >Submit</button>
+                    </div>
+                    <lightning-textarea label="Script to gen Package.xml"></lightning-textarea>
+                    <lightning-textarea label="Script to Deloy"></lightning-textarea>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="4"></lightning-layout-item>
+        </lightning-layout>
+    </div>
+</template>

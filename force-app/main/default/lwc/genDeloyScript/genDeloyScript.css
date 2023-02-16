@@ -1,0 +1,8 @@
+.custom-box{
+    position: relative;
+}
+.pick-org{
+    position: absolute;
+    right: -100px;
+    top: 30px;
+}

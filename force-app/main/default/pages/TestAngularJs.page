@@ -1,0 +1,209 @@
+<apex:page standardStylesheets="false" showHeader="false" controller="ContactCController">
+    <apex:slds />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <html ng-app='testAngularModule' xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+    <body ng-controller='testAngularController'>
+        <article class="slds-card">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-labelledby="element-with-table-label other-element-with-table-label">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th class="" scope="col">
+                            <div class="slds-truncate" title="名前">名前</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate" title="性別">性別</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate" title="住所">住所</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="contact in contacts">
+                    <tr class="slds-hint-parent">
+                        <td data-label="名前">
+                            <div class="slds-truncate"> {{contact.Name__c}}</div>
+                        </td>
+                        <td data-label="性別">
+                            <div class="slds-truncate">{{contact.Gender__c}}</div>
+                        </td>
+                        <td data-label="住所">
+                            <div class="slds-truncate">{{contact.Address__c}}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+        <div class="slds-grid slds-gutters slds-m-top_small">
+            <div class="slds-col slds-size_3-of-12"></div>
+            <article class="slds-card slds-col slds-size_6-of-12 slds-p-top_small slds-p-bottom_small">
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title slds-align_absolute-center">
+                                <span>担当者登録</span>
+                            </h2>
+
+                            <h3 class="slds-text-color_success" ng-show = "successMessage" >
+                                {{successMessage}}
+                            </h3>
+                            <h3 class="slds-text-color_error" ng-show = "errorMessage" >
+                                {{errorMessage}}
+                            </h3>
+                        </div>
+                    </header>
+                </div>
+                <div class="slds-form-element">
+                    <label class="slds-form-element__label" for="text-input-id-46">
+                        <abbr class="slds-required" title="required">* </abbr>名前</label>
+                    <div class="slds-form-element__control">
+                        <input type="text" ng-model='inputContactcData.Name' id="text-input-id-46" placeholder="名前" required="true" class="slds-input"
+                        />
+                    </div>
+
+                    <!-- <label class="slds-form-element__label" for="text-input-id-47">性別</label>
+                    <div class="slds-form-element__control">
+                        <input type="text" ng-model='inputContactcData.Gender' id="text-input-id-47" placeholder="性別" class="slds-input" />
+                    </div> -->
+
+                    <label class="slds-form-element__label" for="combobox-id-1" id="combobox-label-id-3">性別</label>
+                    <div class="slds-form-element__control">
+                        <div class="slds-combobox_container slds-size_small">
+                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" ng-click='pickListClickHandle($event)'>
+                                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                                    <button type="button" class="slds-input_faux slds-combobox__input" aria-labelledby="combobox-label-id-3 combobox-id-1-selected-value"
+                                        id="combobox-id-1-selected-value" aria-controls="listbox-id-1" aria-expanded="false"
+                                        aria-haspopup="listbox">
+                                        <span class="slds-truncate" id="combobox-value-id-3">{{inputContactcData.Gender ? inputContactcData.Gender: 'Select an Option…'}}</span>
+                                    </button>
+                                    <span class="slds-icon_container slds-icon-utility-down slds-input__icon slds-input__icon_right">
+                                        <svg class="slds-icon slds-icon slds-icon_x-small slds-icon-text-default" aria-hidden="true">
+                                            <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid" role="listbox">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                        <li role="presentation" class="slds-listbox__item" ng-click="handleSelectedPickList({Gender: '男'})">
+                                            <div id="option1" class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option">
+                                                <span class="slds-media__figure slds-listbox__option-icon"></span>
+                                                <span class="slds-media__body">
+                                                    <span class="slds-truncate" title="男">男</span>
+                                                </span>
+                                            </div>
+                                        </li>
+                                        <li role="presentation" class="slds-listbox__item" ng-click="handleSelectedPickList({Gender: '女'})">
+                                            <div id="option2" class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option">
+                                                <span class="slds-media__figure slds-listbox__option-icon"></span>
+                                                <span class="slds-media__body">
+                                                    <span class="slds-truncate" title="女">女</span>
+                                                </span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="slds-form-element__label" for="text-input-id-48">住所</label>
+                    <div class="slds-form-element__control">
+                        <input type="text" ng-model='inputContactcData.Address' id="text-input-id-48" placeholder="住所" class="slds-input" />
+                    </div>
+                </div>
+
+                <div class="slds-m-top_medium slds-align_absolute-center">
+                    <button class="slds-button slds-button_brand" ng-click='createContact()'>保存</button>
+                    <button class="slds-button slds-button_destructive">キャンセル</button>
+                </div>
+
+                <!-- <div>{{inputContactcData.Name}}</div> -->
+
+            </article>
+            <div class="slds-col slds-size_3-of-12"></div>
+        </div>
+        <div class="slds-form-element">
+
+        </div>
+    </body>
+
+    </html>
+
+    <script>
+        //create a module
+        const testAngularApp = angular.module('testAngularModule', [])
+            .controller('testAngularController', function ($scope) {
+                $scope.contacts = [];
+
+                $scope.inputContactcData = {};
+
+                $scope.errorMessage;
+                $scope.successMessage;
+
+                $scope.getAllContact = function () {
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.ContactCController.getAllContactC}',
+                        function (result, event) {
+                            if (event.status) {
+                                $scope.contacts = result;
+                            } else {
+                                $scope.errorMessage = 'エラーが発生しました。';
+                            }
+                            //更新を適用
+                            $scope.$apply();
+                        },
+                        { escape: true }
+                    );
+                }
+
+                $scope.getAllContact();
+
+                $scope.createContact = function () {
+                    $scope.successMessage = '';
+                    $scope.errorMessage = '';
+
+                    const params = {
+                        Name: $scope.inputContactcData.Name,
+                        Gender: $scope.inputContactcData.Gender,
+                        Address: $scope.inputContactcData.Address
+                    };
+
+                    console.log('params: '+JSON.stringify(params));
+
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.ContactCController.createContactC}',
+                        params
+                        , function (result, event) {
+                            if (event.status) {
+                                $scope.contacts = result;
+                                $scope.successMessage = '登録しました。';
+                                $scope.getAllContact();
+                            } else {
+                                $scope.errorMessage = 'エラーが発生しました。';
+                            }
+                            //更新を適用
+                            $scope.$apply();
+                        },
+                        { escape: true }
+                    );
+                }
+
+                //onClick Picklist
+                $scope.pickListClickHandle = function ($event){
+                    $event.currentTarget.classList.toggle('slds-is-open');
+                }
+
+                //selected
+                $scope.handleSelectedPickList = function (chooseValue){
+                    let data = $scope.inputContactcData;
+                    data = {...data,...chooseValue}
+                    $scope.inputContactcData = data;
+                }
+
+            })
+
+
+
+
+    </script>
+</apex:page>
