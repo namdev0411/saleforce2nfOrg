@@ -1,0 +1,19 @@
+<template>
+    <!-- <lightning-card  title="Featured Products"> -->
+        <div class="slideshow-container">
+            <template for:each={images} for:item="image">
+                <div class="slide" key={image.title}>
+                    <img src={image.url}>
+                </div>
+            </template>
+            <!-- <div class="slide">
+                <img src='/cms/delivery/media/MCIPDWWIQ3AZFYROLID3VN4ZOZYA?oid=00D5g00000KX48R&channelId=0ap5g000000xROF'>
+                <img src='/cms/delivery/media/MCIPDWWIQ3AZFYROLID3VN4ZOZYA?oid=00D5g00000KX48R&channelId=0ap5g000000xROF'>
+            </div> -->
+            <a class="prev" data-id="-1" onclick={handlePrev}>&#10094;</a>
+            <a class="next" data-id="1" onclick={handleNext}>&#10095;</a>
+            <!-- Add more slides here -->
+        </div>
+    <!-- </lightning-card> -->
+</template>
+

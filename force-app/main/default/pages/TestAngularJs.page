@@ -43,13 +43,14 @@
                             <h2 class="slds-card__header-title slds-align_absolute-center">
                                 <span>担当者登録</span>
                             </h2>
-
-                            <h3 class="slds-text-color_success" ng-show = "successMessage" >
+                            <h3 class="slds-text-color_success slds-text-heading_small" ng-show = "successMessage" >
                                 {{successMessage}}
                             </h3>
-                            <h3 class="slds-text-color_error" ng-show = "errorMessage" >
-                                {{errorMessage}}
-                            </h3>
+                            <div ng-show = "errorMessages" ng-repeat = "errorMessage in errorMessages">
+                                <h3 class="slds-text-color_error slds-text-heading_small">
+                                    {{errorMessage}}
+                                </h3>
+                            </div>
                         </div>
                     </header>
                 </div>
@@ -114,7 +115,7 @@
 
                 <div class="slds-m-top_medium slds-align_absolute-center">
                     <button class="slds-button slds-button_brand" ng-click='createContact()'>保存</button>
-                    <button class="slds-button slds-button_destructive">キャンセル</button>
+                    <button class="slds-button slds-button_destructive" ng-click="handleClickCancel()">キャンセル</button>
                 </div>
 
                 <!-- <div>{{inputContactcData.Name}}</div> -->
@@ -137,9 +138,10 @@
 
                 $scope.inputContactcData = {};
 
-                $scope.errorMessage;
+                $scope.errorMessages = [];
                 $scope.successMessage;
 
+                //init
                 $scope.getAllContact = function () {
                     Visualforce.remoting.Manager.invokeAction(
                         '{!$RemoteAction.ContactCController.getAllContactC}',
@@ -147,7 +149,7 @@
                             if (event.status) {
                                 $scope.contacts = result;
                             } else {
-                                $scope.errorMessage = 'エラーが発生しました。';
+                                $scope.errorMessages.push('エラーが発生しました。');
                             }
                             //更新を適用
                             $scope.$apply();
@@ -155,12 +157,27 @@
                         { escape: true }
                     );
                 }
-
                 $scope.getAllContact();
 
+                //validation inputContactcData
+                $scope.validationInputContactcData = function (){
+                    if(!$scope.inputContactcData.Name){
+                        $scope.errorMessages.push('名前を入力してください。');
+                        return false;
+                    }
+                    return true;
+                }
+
+                //create Contact
                 $scope.createContact = function () {
-                    $scope.successMessage = '';
-                    $scope.errorMessage = '';
+                    //clear message
+                    $scope.clearMessage();
+
+                    //check validation
+                    const validationResult = $scope.validationInputContactcData();
+                    if(!validationResult){
+                        return;
+                    }
 
                     const params = {
                         Name: $scope.inputContactcData.Name,
@@ -178,8 +195,9 @@
                                 $scope.contacts = result;
                                 $scope.successMessage = '登録しました。';
                                 $scope.getAllContact();
+                                $scope.inputContactcData = {};
                             } else {
-                                $scope.errorMessage = 'エラーが発生しました。';
+                                $scope.errorMessages.push('エラーが発生しました。');
                             }
                             //更新を適用
                             $scope.$apply();
@@ -200,10 +218,18 @@
                     $scope.inputContactcData = data;
                 }
 
+                //handelClickCancel
+                $scope.handleClickCancel = function (){
+                    $scope.clearMessage();
+                }
+
+                //clear error and success message
+                $scope.clearMessage = function (){
+                    $scope.errorMessages = [];
+                    $scope.successMessage = '';
+                }
+
             })
-
-
-
 
     </script>
 </apex:page>
