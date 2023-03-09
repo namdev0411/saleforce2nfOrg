@@ -1,235 +1,325 @@
 <apex:page standardStylesheets="false" showHeader="false" controller="ContactCController">
     <apex:slds />
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-    <html ng-app='testAngularModule' xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <html ng-app='app' xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-    <body ng-controller='testAngularController'>
-        <article class="slds-card">
-            <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-labelledby="element-with-table-label other-element-with-table-label">
-                <thead>
-                    <tr class="slds-line-height_reset">
-                        <th class="" scope="col">
-                            <div class="slds-truncate" title="名前">名前</div>
-                        </th>
-                        <th class="" scope="col">
-                            <div class="slds-truncate" title="性別">性別</div>
-                        </th>
-                        <th class="" scope="col">
-                            <div class="slds-truncate" title="住所">住所</div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody ng-repeat="contact in contacts">
-                    <tr class="slds-hint-parent">
-                        <td data-label="名前">
-                            <div class="slds-truncate"> {{contact.Name__c}}</div>
-                        </td>
-                        <td data-label="性別">
-                            <div class="slds-truncate">{{contact.Gender__c}}</div>
-                        </td>
-                        <td data-label="住所">
-                            <div class="slds-truncate">{{contact.Address__c}}</div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </article>
-        <div class="slds-grid slds-gutters slds-m-top_small">
-            <div class="slds-col slds-size_3-of-12"></div>
-            <article class="slds-card slds-col slds-size_6-of-12 slds-p-top_small slds-p-bottom_small">
-                <div class="slds-card__header slds-grid">
-                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+    <body ng-controller='appController'>
+        <div ng-show="isShowToast"  class="slds-notify_container slds-is-relative">
+            <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+                <span class="slds-assistive-text">success</span>
+                <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#success')}"></use>
+                    </svg>
+                </span>
+                <div class="slds-notify__content">
+                    <h2 class="slds-text-heading_small ">担当者
+                        <a href="#">{{inputContactcData.Name}}</a>を登録しました。</h2>
+                </div>
+                <div class="slds-notify__close" style="transform: translateY(-0.125rem);">
+                    <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-m-around_medium">
+            <div class="slds-form-element slds-m-bottom_small">
+                <label class="slds-form-element__label" for="text-input-id-46">
+                    <abbr class="slds-required" title="required">* </abbr>名前</label>
+                <div class="slds-form-element__control">
+                    <input type="text" ng-model='filterValue' id="text-input-id-46" placeholder="名前" required="true" class="slds-input" />
+                </div>
+            </div>
+
+            <div class="slds-m-vertical_medium slds-clearfix">
+                <button class="slds-button slds-button_brand slds-float_right" ng-click='handleClickNewContact()'>新規担当者</button>
+            </div>
+
+            <article class="slds-card">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-labelledby="element-with-table-label other-element-with-table-label">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th class="" scope="col">
+                                <div class="slds-truncate" title="名前">名前</div>
+                            </th>
+                            <th class="" scope="col">
+                                <div class="slds-truncate" title="性別">性別</div>
+                            </th>
+                            <th class="" scope="col">
+                                <div class="slds-truncate" title="住所">住所</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody ng-repeat="contact in contacts | filter: {Name__c: filterValue} | limitTo: 5">
+                        <tr class="slds-hint-parent">
+                            <td data-label="名前">
+                                <div class="slds-truncate"> {{contact.Name__c }}</div>
+                            </td>
+                            <td data-label="性別">
+                                <div class="slds-truncate">{{contact.Gender__c}}</div>
+                            </td>
+                            <td data-label="住所">
+                                <div class="slds-truncate">{{contact.Address__c}}</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+        </div>
+
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" ng-class='isActiveCreateContactForm ? "slds-modal slds-fade-in-open" : "slds-modal"'>
+            <div class="slds-modal__container">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" ng-click="handleClickCancel()">
+                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                        <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Cancel and close</span>
+                </button>
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">担当者登録</h1>
+                </div>
+
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <article class="slds-card slds-p-top_small slds-p-bottom_small">
                         <div class="slds-media__body">
-                            <h2 class="slds-card__header-title slds-align_absolute-center">
-                                <span>担当者登録</span>
-                            </h2>
-                            <h3 class="slds-text-color_success slds-text-heading_small" ng-show = "successMessage" >
+                            <h3 class="slds-text-color_success slds-text-heading_small" ng-show="successMessage">
                                 {{successMessage}}
                             </h3>
-                            <div ng-show = "errorMessages" ng-repeat = "errorMessage in errorMessages">
+                            <div ng-show="errorMessages" ng-repeat="errorMessage in errorMessages">
                                 <h3 class="slds-text-color_error slds-text-heading_small">
                                     {{errorMessage}}
                                 </h3>
                             </div>
                         </div>
-                    </header>
-                </div>
-                <div class="slds-form-element">
-                    <label class="slds-form-element__label" for="text-input-id-46">
-                        <abbr class="slds-required" title="required">* </abbr>名前</label>
-                    <div class="slds-form-element__control">
-                        <input type="text" ng-model='inputContactcData.Name' id="text-input-id-46" placeholder="名前" required="true" class="slds-input"
-                        />
-                    </div>
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="text-input-id-46">
+                                <abbr class="slds-required" title="required">* </abbr>名前</label>
+                            <div class="slds-form-element__control">
+                                <input type="text" ng-model='inputContactcData.Name' id="text-input-id-46" placeholder="名前" required="true" class="slds-input"
+                                />
+                            </div>
 
-                    <!-- <label class="slds-form-element__label" for="text-input-id-47">性別</label>
-                    <div class="slds-form-element__control">
-                        <input type="text" ng-model='inputContactcData.Gender' id="text-input-id-47" placeholder="性別" class="slds-input" />
-                    </div> -->
-
-                    <label class="slds-form-element__label" for="combobox-id-1" id="combobox-label-id-3">性別</label>
-                    <div class="slds-form-element__control">
-                        <div class="slds-combobox_container slds-size_small">
-                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" ng-click='pickListClickHandle($event)'>
-                                <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
-                                    <button type="button" class="slds-input_faux slds-combobox__input" aria-labelledby="combobox-label-id-3 combobox-id-1-selected-value"
-                                        id="combobox-id-1-selected-value" aria-controls="listbox-id-1" aria-expanded="false"
-                                        aria-haspopup="listbox">
-                                        <span class="slds-truncate" id="combobox-value-id-3">{{inputContactcData.Gender ? inputContactcData.Gender: 'Select an Option…'}}</span>
-                                    </button>
-                                    <span class="slds-icon_container slds-icon-utility-down slds-input__icon slds-input__icon_right">
-                                        <svg class="slds-icon slds-icon slds-icon_x-small slds-icon-text-default" aria-hidden="true">
-                                            <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
-                                        </svg>
-                                    </span>
-                                </div>
-                                <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid" role="listbox">
-                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
-                                        <li role="presentation" class="slds-listbox__item" ng-click="handleSelectedPickList({Gender: '男'})">
-                                            <div id="option1" class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option">
-                                                <span class="slds-media__figure slds-listbox__option-icon"></span>
-                                                <span class="slds-media__body">
-                                                    <span class="slds-truncate" title="男">男</span>
-                                                </span>
-                                            </div>
-                                        </li>
-                                        <li role="presentation" class="slds-listbox__item" ng-click="handleSelectedPickList({Gender: '女'})">
-                                            <div id="option2" class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option">
-                                                <span class="slds-media__figure slds-listbox__option-icon"></span>
-                                                <span class="slds-media__body">
-                                                    <span class="slds-truncate" title="女">女</span>
-                                                </span>
-                                            </div>
-                                        </li>
-                                    </ul>
+                            <div class="slds-form-element__control">
+                                <div class="slds-combobox_container">
+                                    <label class="slds-form-element__label" for="combobox-id-1" id="combobox-label-id-3">性別</label>
+                                    <select class="slds-input-has-icon slds-input-has-icon_right slds-input_faux slds-combobox__input" style=" outline: none;"
+                                        role="presentation" ng-model="inputContactcData.Gender">
+                                        <option value="{{null}}">--なし--</option>
+                                        <option value="男">
+                                            男
+                                        </option>
+                                        <option value="女">
+                                            女
+                                        </option>
+                                    </select>
                                 </div>
                             </div>
+
+                            <label class="slds-form-element__label" for="text-input-id-48">住所</label>
+                            <div class="slds-form-element__control">
+                                <input type="text" ng-model='inputContactcData.Address' id="text-input-id-48" placeholder="住所" class="slds-input" />
+                            </div>
                         </div>
-                    </div>
-
-                    <label class="slds-form-element__label" for="text-input-id-48">住所</label>
-                    <div class="slds-form-element__control">
-                        <input type="text" ng-model='inputContactcData.Address' id="text-input-id-48" placeholder="住所" class="slds-input" />
-                    </div>
+                    </article>
                 </div>
 
-                <div class="slds-m-top_medium slds-align_absolute-center">
+                <div class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" aria-label="Cancel and close" ng-click="handleClickCancel()">キャンセル</button>
                     <button class="slds-button slds-button_brand" ng-click='createContact()'>保存</button>
-                    <button class="slds-button slds-button_destructive" ng-click="handleClickCancel()">キャンセル</button>
                 </div>
-
-                <!-- <div>{{inputContactcData.Name}}</div> -->
-
-            </article>
-            <div class="slds-col slds-size_3-of-12"></div>
-        </div>
-        <div class="slds-form-element">
-
+            </div>
+        </section>
+        <div ng-show='isActiveCreateContactForm' class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        <div ng-show='isLoading' style="height:6rem;position:relative">
+            <div class="slds-spinner_container slds-is-fixed">
+                <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                    <span class="slds-assistive-text">読み込み中</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
         </div>
     </body>
 
     </html>
 
+    <apex:include pageName="common" />
+
     <script>
-        //create a module
-        const testAngularApp = angular.module('testAngularModule', [])
-            .controller('testAngularController', function ($scope) {
-                $scope.contacts = [];
+        //create controller
+        app.controller('appController', function ($scope, $timeout, common) {
+            $scope.contacts = [];
+            $scope.inputContactcData = {
+                Name: '',
+                Gender: null,
+                Addres: ''
+            };
 
-                $scope.inputContactcData = {};
+            $scope.errorMessages = [];
+            $scope.successMessage;
 
+            $scope.filterValue = '';
+            $scope.isActiveCreateContactForm = false;
+            $scope.openChooseGenderPickList = false;
+            $scope.isLoading = false;
+            $scope.isShowToast = false;
+
+            //init
+            $scope.init = async function () {
+                $scope.isLoading = true;
+                try {
+                    const result = await common.callApexWithoutParams('{!$RemoteAction.ContactCController.getAllContactC}');
+                    $scope.contacts = result;
+                } catch (error) {
+                    $scope.errorMessages.push('エラーが発生しました。');
+                } finally {
+                    $scope.isLoading = false;
+                    $scope.$digest();
+                }
+            }
+
+            //init
+            $scope.init();
+
+            //handleClickNewContact
+            $scope.handleClickNewContact = function () {
+                $scope.clearMessage();
+                $scope.inputFormData();
+                $scope.isActiveCreateContactForm = true;
+            }
+
+            //validation inputContactcData
+            $scope.validationInputContactcData = function () {
+                if (!$scope.inputContactcData.Name) {
+                    $scope.errorMessages.push('名前を入力してください。');
+                    return false;
+                }
+                return true;
+            }
+
+            //showToast
+            $scope.showToast = function () {
+                $scope.isShowToast = true;
+                $timeout(function (){
+                    $scope.isShowToast = false;
+                    $scope.$digest();
+                }, 1500)
+            }
+
+            //create Contact
+            $scope.createContact = function () {
+                //clear message
+                $scope.clearMessage();
+
+                //check validation
+                const validationResult = $scope.validationInputContactcData();
+                if (!validationResult) {
+                    return;
+                }
+
+                //loading
+                $scope.isLoading = true;
+
+                const params = {
+                    Name: $scope.inputContactcData.Name,
+                    Gender: $scope.inputContactcData.Gender,
+                    Address: $scope.inputContactcData.Address
+                };
+
+                console.log('params: ' + JSON.stringify(params));
+
+                common.callApexWith1Param(
+                    '{!$RemoteAction.ContactCController.createContactC}',
+                    params
+                )
+                    .then(() => {
+                        return common.callApexWithoutParams('{!$RemoteAction.ContactCController.getAllContactC}');
+                    })
+                    .then(result => {
+                        console.log('result: ' + JSON.stringify(result));
+                        $scope.contacts = result;
+                        //clear inputformdata
+                        $scope.inputFormData();
+                        //clear error and success message
+                        $scope.clearMessage();
+                        //showToast 
+                        $scope.showToast();
+                        //close form
+                        $scope.isActiveCreateContactForm = false;
+                    })
+                    .catch(error => {
+                        $scope.errorMessages.push('エラーが発生しました。')
+                    })
+                    .finally(() => {
+                        $scope.isLoading = false;
+                        $scope.$digest();
+                    })
+
+            }
+
+            //onClick Picklist
+            $scope.togglePickListHandle = function () {
+                $scope.openChooseGenderPickList = !$scope.openChooseGenderPickList;
+            }
+
+            //handelClickCancel
+            $scope.handleClickCancel = function () {
+                $scope.clearMessage();
+                $scope.isActiveCreateContactForm = false;
+            }
+
+            //clear error and success message
+            $scope.clearMessage = function () {
                 $scope.errorMessages = [];
-                $scope.successMessage;
+                $scope.successMessage = '';
+            }
 
-                //init
-                $scope.getAllContact = function () {
+            //clear inputformdata
+            $scope.inputFormData = function () {
+                $scope.inputContactcData = {};
+            }
+
+        });
+
+        //create service
+        app.service('common', function ($q) {
+            this.callApexWithoutParams = function (action) {
+                return $q(function (resolve, reject) {
                     Visualforce.remoting.Manager.invokeAction(
-                        '{!$RemoteAction.ContactCController.getAllContactC}',
-                        function (result, event) {
-                            if (event.status) {
-                                $scope.contacts = result;
-                            } else {
-                                $scope.errorMessages.push('エラーが発生しました。');
-                            }
-                            //更新を適用
-                            $scope.$apply();
-                        },
-                        { escape: true }
-                    );
-                }
-                $scope.getAllContact();
-
-                //validation inputContactcData
-                $scope.validationInputContactcData = function (){
-                    if(!$scope.inputContactcData.Name){
-                        $scope.errorMessages.push('名前を入力してください。');
-                        return false;
-                    }
-                    return true;
-                }
-
-                //create Contact
-                $scope.createContact = function () {
-                    //clear message
-                    $scope.clearMessage();
-
-                    //check validation
-                    const validationResult = $scope.validationInputContactcData();
-                    if(!validationResult){
-                        return;
-                    }
-
-                    const params = {
-                        Name: $scope.inputContactcData.Name,
-                        Gender: $scope.inputContactcData.Gender,
-                        Address: $scope.inputContactcData.Address
-                    };
-
-                    console.log('params: '+JSON.stringify(params));
-
-                    Visualforce.remoting.Manager.invokeAction(
-                        '{!$RemoteAction.ContactCController.createContactC}',
-                        params
+                        action
                         , function (result, event) {
                             if (event.status) {
-                                $scope.contacts = result;
-                                $scope.successMessage = '登録しました。';
-                                $scope.getAllContact();
-                                $scope.inputContactcData = {};
+                                resolve(result);
                             } else {
-                                $scope.errorMessages.push('エラーが発生しました。');
+                                reject('error');
                             }
-                            //更新を適用
-                            $scope.$apply();
                         },
                         { escape: true }
                     );
-                }
+                });
+            }
 
-                //onClick Picklist
-                $scope.pickListClickHandle = function ($event){
-                    $event.currentTarget.classList.toggle('slds-is-open');
-                }
-
-                //selected
-                $scope.handleSelectedPickList = function (chooseValue){
-                    let data = $scope.inputContactcData;
-                    data = {...data,...chooseValue}
-                    $scope.inputContactcData = data;
-                }
-
-                //handelClickCancel
-                $scope.handleClickCancel = function (){
-                    $scope.clearMessage();
-                }
-
-                //clear error and success message
-                $scope.clearMessage = function (){
-                    $scope.errorMessages = [];
-                    $scope.successMessage = '';
-                }
-
-            })
+            this.callApexWith1Param = function (action, params) {
+                return $q(function (resolve, reject) {
+                    Visualforce.remoting.Manager.invokeAction(
+                        action
+                        , params
+                        , function (result, event) {
+                            if (event.status) {
+                                resolve(result);
+                            } else {
+                                reject('error');
+                            }
+                        },
+                        { escape: true }
+                    );
+                });
+            }
+        });
 
     </script>
 </apex:page>

@@ -1,5 +1,6 @@
 import { api, LightningElement, track, wire } from 'lwc';
 import getAllContentByChannel from '@salesforce/apex/CMSController.getAllContentByChannel';
+import getNetWork from '@salesforce/apex/CMSController.getNetWork';
 
 export default class SlideShow extends LightningElement {
     @api channelName;
@@ -18,6 +19,11 @@ export default class SlideShow extends LightningElement {
             console.log(data);
             this.images = data;
         }
+    }
+
+    connectedCallback(){
+        
+        console.log('net work: '+ JSON.stringify(getNetWork()));
     }
 
     renderedCallback(){

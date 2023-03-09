@@ -5,7 +5,7 @@ public with sharing class ContactCController {
 
     @RemoteAction
     public static List<ContactC__c> getAllContactC(){
-        return [SELECT Id, Name__c, Gender__c, Address__c FROM ContactC__c LIMIT 50000];
+        return [SELECT Id, Name__c, Gender__c, Address__c, CreatedDate FROM ContactC__c ORDER BY CreatedDate DESC LIMIT 50000];
     }
 
     @RemoteAction
@@ -24,7 +24,7 @@ public with sharing class ContactCController {
     class ContactCDto{
         public String Name {get;set;}
         public String Gender {get;set;} 
-        public String Address {get;set;}  
+        public String Address {get;set;}
     }
 
     class ContactCException extends Exception {}
