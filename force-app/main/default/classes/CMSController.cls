@@ -115,7 +115,13 @@ public with sharing class CMSController {
 
                     //get url
                     Map<String, ConnectApi.ManagedContentNodeValue> noteMap = item.contentNodes;
+                    
                     for (String str : noteMap.keySet()) {
+                        system.debug(str +': '+noteMap.get(str));
+                        if (str == 'bannerImage') {
+                            cdDto.url = ((ConnectApi.ManagedContentMediaNodeValue)noteMap.get(str)).unauthenticatedUrl;
+                        }
+
                         if (str == 'source') {
                             cdDto.url = ((ConnectApi.ManagedContentMediaSourceNodeValue)noteMap.get(str)).url;
                         }

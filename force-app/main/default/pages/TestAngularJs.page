@@ -146,12 +146,15 @@
     </body>
 
     </html>
-
-    <apex:include pageName="common" />
+    <script language="javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <apex:include pageName="CommonService" />
 
     <script>
+        //create a module
+        const app = angular.module('app', []);
+
         //create controller
-        app.controller('appController', function ($scope, $timeout, common) {
+        app.controller('appController', function ($scope, $timeout, CommonService) {
             $scope.contacts = [];
             $scope.inputContactcData = {
                 Name: '',
@@ -172,7 +175,7 @@
             $scope.init = async function () {
                 $scope.isLoading = true;
                 try {
-                    const result = await common.callApexWithoutParams('{!$RemoteAction.ContactCController.getAllContactC}');
+                    const result = await CommonService.callApexWithoutParams('{!$RemoteAction.ContactCController.getAllContactC}');
                     $scope.contacts = result;
                 } catch (error) {
                     $scope.errorMessages.push('エラーが発生しました。');
@@ -232,12 +235,12 @@
 
                 console.log('params: ' + JSON.stringify(params));
 
-                common.callApexWith1Param(
+                CommonService.callApexWith1Param(
                     '{!$RemoteAction.ContactCController.createContactC}',
                     params
                 )
                     .then(() => {
-                        return common.callApexWithoutParams('{!$RemoteAction.ContactCController.getAllContactC}');
+                        return CommonService.callApexWithoutParams('{!$RemoteAction.ContactCController.getAllContactC}');
                     })
                     .then(result => {
                         console.log('result: ' + JSON.stringify(result));
@@ -286,40 +289,6 @@
         });
 
         //create service
-        app.service('common', function ($q) {
-            this.callApexWithoutParams = function (action) {
-                return $q(function (resolve, reject) {
-                    Visualforce.remoting.Manager.invokeAction(
-                        action
-                        , function (result, event) {
-                            if (event.status) {
-                                resolve(result);
-                            } else {
-                                reject('error');
-                            }
-                        },
-                        { escape: true }
-                    );
-                });
-            }
-
-            this.callApexWith1Param = function (action, params) {
-                return $q(function (resolve, reject) {
-                    Visualforce.remoting.Manager.invokeAction(
-                        action
-                        , params
-                        , function (result, event) {
-                            if (event.status) {
-                                resolve(result);
-                            } else {
-                                reject('error');
-                            }
-                        },
-                        { escape: true }
-                    );
-                });
-            }
-        });
-
+        app.service('CommonService', CommonService);
     </script>
 </apex:page>

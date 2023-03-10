@@ -14,11 +14,16 @@ public with sharing class SyncCmsContentQueue implements Queueable{
         List<ContentManaged__c> ctms = new  List<ContentManaged__c>();
         
         for (CMSController.ContentDto cto : ContentDtos) {
+            CommunityChannel__c cmc = new CommunityChannel__c(
+                ChannelId__c = this.channelId
+            );
+
             ContentManaged__c ctm = new ContentManaged__c(
                 Name = cto.title,
                 ContentUrl__c = cto.url,
                 ContentType__c = cto.type,
-                ContentKey__c = cto.contentKey
+                ContentKey__c = cto.contentKey,
+                CommunityChannel__r = cmc
             );
             ctms.add(ctm);
         }

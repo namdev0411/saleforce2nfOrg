@@ -1,0 +1,39 @@
+<apex:page >
+    <script language="javascript">
+        const CommonService = function(){
+            this.callApexWithoutParams = function (action) {
+                return new Promise(function (resolve, reject) {
+                    Visualforce.remoting.Manager.invokeAction(
+                        action
+                        , function (result, event) {
+                            if (event.status) {
+                                resolve(result);
+                            } else {
+                                reject('error');
+                            }
+                        },
+                        { escape: true }
+                    );
+                });
+            }
+
+            this.callApexWith1Param = function (action, params) {
+                return new Promise(function (resolve, reject) {
+                    Visualforce.remoting.Manager.invokeAction(
+                        action
+                        , params
+                        , function (result, event) {
+                            if (event.status) {
+                                resolve(result);
+                            } else {
+                                reject('error');
+                            }
+                        },
+                        { escape: true }
+                    );
+                });
+            }
+        }
+    </script>
+
+</apex:page>
