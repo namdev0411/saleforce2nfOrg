@@ -3,29 +3,6 @@
     <html ng-app='app' xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
     <body ng-controller='appController'>
-        <div ng-show="isShowToast"  class="slds-notify_container slds-is-relative">
-            <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
-                <span class="slds-assistive-text">success</span>
-                <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
-                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                        <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#success')}"></use>
-                    </svg>
-                </span>
-                <div class="slds-notify__content">
-                    <h2 class="slds-text-heading_small ">担当者
-                        <a href="#">{{inputContactcData.Name}}</a>を登録しました。</h2>
-                </div>
-                <div class="slds-notify__close" style="transform: translateY(-0.125rem);">
-                    <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
-                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
-                            <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
-                        </svg>
-                        <span class="slds-assistive-text">Close</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <div class="slds-m-around_medium">
             <div class="slds-form-element slds-m-bottom_small">
                 <label class="slds-form-element__label" for="text-input-id-46">
@@ -39,38 +16,40 @@
                 <button class="slds-button slds-button_brand slds-float_right" ng-click='handleClickNewContact()'>新規担当者</button>
             </div>
 
-            <article class="slds-card">
-                <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-labelledby="element-with-table-label other-element-with-table-label">
+            <article class="slds-card" style="height: 235px">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered" aria-labelledby="element-with-table-label other-element-with-table-label">
                     <thead>
                         <tr class="slds-line-height_reset">
-                            <th class="" scope="col">
-                                <div class="slds-truncate" title="名前">名前</div>
+                            <th ng-repeat="field in tableField" class="" scope="col" style="width:300px">
+                                <div class="slds-truncate" title="field.label">{{field.label}}</div>
                             </th>
                             <th class="" scope="col">
-                                <div class="slds-truncate" title="性別">性別</div>
-                            </th>
-                            <th class="" scope="col">
-                                <div class="slds-truncate" title="住所">住所</div>
+                                <div class="slds-truncate" title="アクション">アクション</div>
                             </th>
                         </tr>
                     </thead>
-                    <tbody ng-repeat="contact in contacts | filter: {Name__c: filterValue} | limitTo: 5">
-                        <tr class="slds-hint-parent">
-                            <td data-label="名前">
-                                <div class="slds-truncate"> {{contact.Name__c }}</div>
+
+                    <tbody>
+                        <tr ng-repeat="contact in dataToshow" class="slds-hint-parent">
+                            <td ng-repeat="field in tableField" data-label="field.label">
+                                <div class="slds-truncate"> {{contact[field.fieldApiName] }}</div>
                             </td>
-                            <td data-label="性別">
-                                <div class="slds-truncate">{{contact.Gender__c}}</div>
-                            </td>
-                            <td data-label="住所">
-                                <div class="slds-truncate">{{contact.Address__c}}</div>
+                            <td style="width: 190px">
+                                <div class="slds-truncate">
+                                    <button class="slds-button slds-button_neutral">編集</button>
+                                    <button ng-click = "handleClickDeleteContactRow(contact.Id)" class="slds-button slds-button_destructive">削除</button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </article>
+            <div ng-show = "contacts.length > 0" class="cnav-wrapper">
+                <pagination current-page = "currentPage" total-data = "contacts" perpage = "perpage"></pagination>
+            </div>
         </div>
 
+        <!-- 担当者登録 -->
         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" ng-class='isActiveCreateContactForm ? "slds-modal slds-fade-in-open" : "slds-modal"'>
             <div class="slds-modal__container">
                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" ng-click="handleClickCancel()">
@@ -133,7 +112,9 @@
                 </div>
             </div>
         </section>
-        <div ng-show='isActiveCreateContactForm' class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        <div ng-class="isActiveCreateContactForm || isConfirmRemoveContact ? 'slds-backdrop slds-backdrop_open' : 'slds-backdrop'" role="presentation"></div>
+
+        <!-- Spinner -->
         <div ng-show='isLoading' style="height:6rem;position:relative">
             <div class="slds-spinner_container slds-is-fixed">
                 <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
@@ -143,6 +124,95 @@
                 </div>
             </div>
         </div>
+
+        <!-- Toast -->
+        <div ng-show="isShowToast" class="slds-notify_container">
+            <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+                <span class="slds-assistive-text">success</span>
+                <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+                    <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                        <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#success')}"></use>
+                    </svg>
+                </span>
+                <div class="slds-notify__content">
+                    <h2 class="slds-text-heading_small ">担当者
+                        <a href="#">{{inputContactcData.Name}}</a>を登録しました。</h2>
+                </div>
+                <div class="slds-notify__close" style="transform: translateY(-0.125rem);">
+                    <button class="slds-button slds-button_icon slds-button_icon-inverse" title="Close">
+                        <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                            <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 削除モダール -->
+        <section ng-show="isConfirmRemoveContact" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <button ng-click = "closeConfirmDeleteContactRow()" class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse">
+                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                        <use xlink:href="{!URLFOR($Asset.SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Cancel and close</span>
+                </button>
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">担当者をを削除</h1>
+                </div>
+                <div id="content_1398:0" class="modal-body scrollable slds-modal__content slds-p-around--medium" data-aura-rendered-by="1425:0"
+                    data-scoped-scroll="true">
+                    <div class="detail slds-text-align--center" data-aura-rendered-by="1409:0">この担当者の削除を実行しますか?</div>
+                </div>
+                <div class="slds-modal__footer">
+                    <button ng-click = "closeConfirmDeleteContactRow()" class="slds-button slds-button_neutral" aria-label="Cancel and close">キャンセル</button>
+                    <button ng-click = "removeContactRow()" class="slds-button slds-button_brand">削除</button>
+                </div>
+            </div>
+        </section>
+
+        <style>
+            .cnav{
+                display: flex !important;   
+            }
+
+            .cnav .cnav-item{
+                height: 41px;
+                width: 41px;
+
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+
+                cursor: pointer;
+                border-top: 1px solid black;
+                border-bottom: 1px solid black;
+                border-right: 1px solid black;
+            }
+
+            .cnav .cnav-item:first-child{
+                border-left: 1px solid black;
+            }
+
+            .cnav .cnav-item:hover{
+                background: #333;
+                color: #fff;
+            }
+
+            .cnav .cnav-item.active{
+                background: #333;
+                color: #fff;
+            }
+
+            .cnav-wrapper{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                margin: 15px;
+            }
+        </style>
     </body>
 
     </html>
@@ -154,7 +224,34 @@
         const app = angular.module('app', []);
 
         //create controller
-        app.controller('appController', function ($scope, $timeout, CommonService) {
+        app.controller('appController', function ($scope, $timeout, CommonService, $rootScope) {
+            $scope.isShowToast = false;
+
+            //担当者削除確認画面
+            $scope.isConfirmRemoveContact = false;
+
+            //削除対象担当者Id
+            $scope.targetDeleteContactId = '';
+
+            //データテーブルの項目
+            $scope.tableField = [
+                {
+                    label: '名前',
+                    fieldApiName: 'Name__c'
+                },
+                {
+                    label: '性別',
+                    fieldApiName: 'Gender__c'
+                },
+                {
+                    label: '住所',
+                    fieldApiName: 'Address__c'
+                }
+            ];
+
+            $scope.currentPage = 1;
+            $scope.perpage = 5;
+
             $scope.contacts = [];
             $scope.inputContactcData = {
                 Name: '',
@@ -169,7 +266,32 @@
             $scope.isActiveCreateContactForm = false;
             $scope.openChooseGenderPickList = false;
             $scope.isLoading = false;
-            $scope.isShowToast = false;
+
+            $scope.dataToshow = [];
+            $scope.$watchGroup(['currentPage', 'contacts'], function(newValue, oldValue){
+                if(newValue !== oldValue){
+                    $scope.dataToshow = getDataShow();
+                }
+            });
+
+            $scope.$watch('contacts', function(newValue, oldValue){
+                if(newValue !== oldValue){
+                    console.log($scope.contacts.length);
+                }
+            });
+
+            function getDataShow(){
+                let items = [];
+                const maxIndex = $scope.contacts.length -1;
+                let startIndex = $scope.currentPage * $scope.perpage - $scope.perpage;
+                let endIndex = startIndex + $scope.perpage -1 <= maxIndex ? startIndex + $scope.perpage -1: maxIndex;
+
+                for(let i = startIndex; i<= endIndex ; i++){
+                    items.push($scope.contacts[i]);
+                }
+
+                return items;
+            }
 
             //init
             $scope.init = async function () {
@@ -177,6 +299,8 @@
                 try {
                     const result = await CommonService.callApexWithoutParams('{!$RemoteAction.ContactCController.getAllContactC}');
                     $scope.contacts = result;
+                    $scope.dataToshow = getDataShow();
+                    $scope.$digest();
                 } catch (error) {
                     $scope.errorMessages.push('エラーが発生しました。');
                 } finally {
@@ -202,15 +326,6 @@
                     return false;
                 }
                 return true;
-            }
-
-            //showToast
-            $scope.showToast = function () {
-                $scope.isShowToast = true;
-                $timeout(function (){
-                    $scope.isShowToast = false;
-                    $scope.$digest();
-                }, 1500)
             }
 
             //create Contact
@@ -255,13 +370,52 @@
                         $scope.isActiveCreateContactForm = false;
                     })
                     .catch(error => {
-                        $scope.errorMessages.push('エラーが発生しました。')
+                        console.log(JSON.stringify(error));
+                        $scope.errorMessages.push(error.message);
                     })
                     .finally(() => {
                         $scope.isLoading = false;
                         $scope.$digest();
                     })
 
+            }
+
+            $scope.handleClickDeleteContactRow = function (deleteContactId) {
+                console.log('deleteContactId: '+deleteContactId);
+                $scope.targetDeleteContactId = deleteContactId;
+                $scope.isConfirmRemoveContact = true;
+            }
+
+            $scope.closeConfirmDeleteContactRow = function () {
+                $scope.isConfirmRemoveContact = false;
+                $scope.targetDeleteContactId = '';
+            }
+
+            $scope.removeContactRow = function () {
+                //loading
+                $scope.isLoading = true;
+
+                CommonService.callApexWith1Param('{!$RemoteAction.ContactCController.removeContactCById}', $scope.targetDeleteContactId)
+                .then(()=>{
+                    let newContacts = [];
+                    $scope.contacts.forEach(contact => {
+                        if(contact.Id !== $scope.targetDeleteContactId){
+                            newContacts.push(contact);
+                        }
+                    });
+                    $scope.contacts = newContacts;
+                    //担当者削除確認画面
+                    $scope.isConfirmRemoveContact = false;
+                })
+                .catch((error)=>{
+                    console.log(JSON.stringify(error));
+                })
+                .finally(()=>{
+                    //loading
+                    $scope.isLoading = false;
+                    //
+                    $scope.$digest();
+                })
             }
 
             //onClick Picklist
@@ -286,9 +440,24 @@
                 $scope.inputContactcData = {};
             }
 
+            //showToast
+            $scope.showToast = function () {
+                $scope.isShowToast = true;
+                $timeout(function () {
+                    $scope.isShowToast = false;
+                    $scope.$digest();
+                }, 1500)
+            }
+
         });
 
         //create service
         app.service('CommonService', CommonService);
+
+        //directive
+        app.directive('pagination',CommonPaginationDirective);
+
+        
+        
     </script>
 </apex:page>

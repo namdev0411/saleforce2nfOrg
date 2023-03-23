@@ -1,39 +1,144 @@
 <apex:page >
     <script language="javascript">
-        const CommonService = function(){
-            this.callApexWithoutParams = function (action) {
-                return new Promise(function (resolve, reject) {
-                    Visualforce.remoting.Manager.invokeAction(
-                        action
-                        , function (result, event) {
-                            if (event.status) {
-                                resolve(result);
-                            } else {
-                                reject('error');
-                            }
-                        },
-                        { escape: true }
-                    );
-                });
-            }
-
-            this.callApexWith1Param = function (action, params) {
-                return new Promise(function (resolve, reject) {
-                    Visualforce.remoting.Manager.invokeAction(
-                        action
-                        , params
-                        , function (result, event) {
-                            if (event.status) {
-                                resolve(result);
-                            } else {
-                                reject('error');
-                            }
-                        },
-                        { escape: true }
-                    );
-                });
+        const CommonService = function($q){
+            return{
+                callApexWithoutParams: function (action) {
+                    return $q(function (resolve, reject) {
+                        Visualforce.remoting.Manager.invokeAction(
+                            action
+                            , function (result, event) {
+                                if (event.status) {
+                                    resolve(result);
+                                } else {
+                                    reject(event);
+                                }
+                            },
+                            { escape: true }
+                        );
+                    });
+                },
+                callApexWith1Param:  function (action, params) {
+                    return $q(function (resolve, reject) {
+                        Visualforce.remoting.Manager.invokeAction(
+                            action
+                            , params || ""
+                            , function (result, event) {
+                                if (event.status) {
+                                    resolve(result);
+                                } else {
+                                    reject(event);
+                                }
+                            },
+                            { escape: true }
+                        );
+                    });
+                }
             }
         }
-    </script>
+        
+        const CommonPaginationDirective = function() {
+            var directive = {
+                link: link,
+                restrict: 'E',
+                template: `
+                    <nav class="cnav">
+                        <div ng-click="onPrePage()" class="cnav-item">
+                            <<
+                        </div>
+                        <div ng-click="selectedPage(page)" ng-repeat="page in pages track by $index" class="cnav-item" ng-class="{active: currentPage == page}">
+                            {{page}}
+                        </div>
+                        <div ng-click="onNextPage()" class="cnav-item">
+                            >>
+                        </div>
+                    </nav>
+                `,
+                scope: {
+                    currentPage: '=',
+                    totalData: '=',
+                    perpage: '='
+                },
+                replace: true,
+            };
 
+            function link(scope, $element, $attrs, controller) {
+                const showMaxPage = 5;
+                const nuashowMaxPage = Math.ceil(showMaxPage/2);
+
+                let maxTotalPage;
+                scope.pages = [];
+                scope.startPage = 1;
+                scope.endPage;
+
+                //feature
+                scope.selectedPage = function(page){
+                    scope.currentPage = page;
+                }
+
+                scope.onPrePage = function(){
+                    if(scope.currentPage > 1){
+                        scope.currentPage = scope.currentPage -1;
+                    }
+                }
+
+                scope.onNextPage = function(){
+                    if(scope.currentPage < maxTotalPage){
+                        scope.currentPage = scope.currentPage +1;
+                    }
+                }
+
+                scope.$watch('totalData', function(newValue, oldValue){
+                    maxTotalPage = getMaxTotalPage();
+
+                    if(scope.currentPage > maxTotalPage && maxTotalPage > 0){
+                        scope.currentPage = maxTotalPage;
+                    }
+
+                    scope.pages = [];
+
+                    scope.startPage = 1;
+                    scope.endPage;
+
+                    if(maxTotalPage <= showMaxPage){
+                        scope.endPage = maxTotalPage;
+                    }else{
+                        scope.endPage = showMaxPage;
+                    }
+
+                    for(let i = scope.startPage; i <= scope.endPage; i++){
+                        scope.pages.push(i);
+                    }
+                });
+
+                scope.$watch('currentPage', function(newValue, oldValue){
+                    if(newValue != oldValue){       
+                        if(newValue > oldValue){
+                            if(scope.currentPage > nuashowMaxPage){
+                                scope.endPage = scope.currentPage + nuashowMaxPage -1 < maxTotalPage ? scope.currentPage + nuashowMaxPage - 1 : maxTotalPage;
+                            }else{
+                                scope.endPage = showMaxPage < maxTotalPage ? showMaxPage : maxTotalPage;
+                            }
+                            scope.startPage =  scope.endPage - showMaxPage + 1 > 0 ? scope.endPage - showMaxPage + 1 : 1;
+                        }else{
+                            if(scope.endPage - scope.currentPage >= nuashowMaxPage){
+                                scope.startPage = scope.currentPage - nuashowMaxPage + 1 > 0 ? scope.currentPage - nuashowMaxPage + 1 : 1;
+                                scope.endPage =  scope.startPage + showMaxPage -1 > maxTotalPage ? maxTotalPage : scope.startPage + showMaxPage -1;
+                            }
+                        }
+                        
+                        scope.pages = [];
+                        for(let i = scope.startPage; i <= scope.endPage; i++){
+                            scope.pages.push(i);
+                        }
+                    }
+                })
+
+                function getMaxTotalPage(){
+                    return Math.ceil(scope.totalData.length/scope.perpage);
+                }
+            }  
+
+            return directive;
+        }
+    </script>
 </apex:page>

@@ -17,8 +17,29 @@ public with sharing class ContactCController {
         ct.Address__c = ctDto.Address;
         insert ct;
        } catch (Exception e) {
-        throw new ContactCException(e);
+        String message = e.getMessage();
+        if (message.contains('REQUIRED_FIELD_MISSING')) {
+            message = message.substringBetween('REQUIRED_FIELD_MISSING,', ': [');
+        }
+        throw new ContactCException(message);
        }
+    }
+
+    @RemoteAction
+    public static void removeContactCById(String ccId){
+        System.debug('ccId: '+ccId);
+        System.debug('user: '+userInfo.getName());
+       try {
+            if (String.isNotBlank(ccId)) {
+                String query ='SELECT Id FROM Contactc__c WHERE Id = \''+String.escapeSingleQuotes(ccid)+'\'';
+                delete Database.query(query);
+            }else{
+                throw new ContactCException('担当者Idが必須です。');
+            }
+        } catch (Exception e) {
+            System.debug('e '+e.getMessage());
+            throw new ContactCException('担当者を削除できまませんでした。システム管理者に問い合わせください。');
+        }
     }
 
     class ContactCDto{
