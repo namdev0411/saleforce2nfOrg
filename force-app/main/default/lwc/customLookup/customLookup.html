@@ -1,0 +1,76 @@
+<template>
+    <div class={inputClass} style="height: 255px; position: relative">
+        <label class="slds-form-element__label" for="text-input-id-47">
+            <abbr class="slds-required" title="required">* </abbr>AS装置情報</label>
+        <div class="slds-combobox_container">
+            <div class={lookupClass}>
+                <!--未選択-->
+                <div class="slds-form-element__control">
+                    <template if:false={isSelected}>
+                        <input 
+                            onfocus={handleLookupClick} 
+                            onblur={handleBlur}
+                            onkeyup={handleChangeInput} 
+                            type="text"
+                            class="slds-input slds-combobox__input inputAs"
+                            role="combobox" placeholder="AS装置情報を検索..." />
+
+                        <div class="slds-dropdown slds-dropdown_length-with-icon-4c slds-dropdown_fluid">
+                            <ul class="slds-listbox slds-listbox_vertical">
+                                <template for:each={deviceOptions} for:item="device">
+                                    <li key={device.Id} role="presentation" class="slds-listbox__item"
+                                        onclick={handleLookupItemClick} data-id={device.Id} data-name={device.Name}>
+                                        <div class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta"
+                                            role="option">
+                                            <span class="slds-media__figure slds-listbox__option-icon">
+                                                <span class="slds-icon_container slds-icon-standard-account">
+                                                    <lightning-icon icon-name="custom:custom63"
+                                                        alternative-text="Approved"
+                                                        title="Approved"></lightning-icon>
+                                                </span>
+                                            </span>
+                                            <span class="slds-media__body">
+                                                <span
+                                                    class="slds-listbox__option-text slds-listbox__option-text_entity">{device.Name}</span>
+                                                <span
+                                                    class="slds-listbox__option-meta slds-listbox__option-meta_entity">{device.SerialNumber__c}</span>
+                                                <span
+                                                    class="slds-listbox__option-meta slds-listbox__option-meta_entity">{device.GOUKI_NO__c}</span>
+                                            </span>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+                    <!--selected-->
+                    <template if:true={isSelected}>
+                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left-right"
+                            role="none">
+                            <span
+                                class="slds-icon_container slds-icon-standard-account slds-combobox__input-entity-icon"
+                                title="Account">
+                                <lightning-icon icon-name="custom:custom63" alternative-text="AS装置情報"
+                                    title="AS装置情報"></lightning-icon>
+                                <span class="slds-assistive-text">AS装置情報</span>
+                            </span>
+                            <button type="button"
+                                class="slds-input_faux slds-combobox__input slds-combobox__input-value"
+                                aria-controls="popover-unique-id-05" aria-expanded="false" aria-haspopup="dialog">
+                                <span class="slds-truncate">{selectedDeviceName}</span>
+                            </button>
+                            <button onclick={clearSelectedOption}
+                                class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
+                                title="Remove selected option">
+                                <lightning-icon icon-name="utility:close" alternative-text="Delete" size="xx-small"
+                                    title="Delete"></lightning-icon>
+                                <span class="slds-assistive-text">Remove selected option</span>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+                <div class="slds-form-element__help">{inputErrorMessage}</div>
+            </div>
+        </div>
+    </div>
+</template>
